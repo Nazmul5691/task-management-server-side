@@ -35,7 +35,7 @@ async function run() {
 
 
     const userCollection = client.db('taskManager').collection('user');
-
+    const addTaskCollection = client.db('taskManager').collection('addTask');
 
 
     //create user
@@ -46,6 +46,84 @@ async function run() {
         res.send(result);
     });
 
+
+    //add task
+    app.post('/addTask', async(req, res) =>{
+        const newAddTask = req.body;
+        const result = await addTaskCollection.insertOne(newAddTask)
+        res.send(result);
+  
+      })
+
+    
+    //get task  in todo list
+    app.get('/addTask', async(req, res) =>{
+        const curser = addTaskCollection.find()
+        const result = await curser.toArray()
+        res.send(result);
+      })
+
+
+
+    //get task on updated task page
+    app.get('/addTask/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+        const result = await addTaskCollection.findOne(query)
+        res.send(result)
+  });
+
+
+    
+    //update task
+app.put('/addTask/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const options = { upsert: true };
+    const updatedTask = req.body;
+    const update = {
+      $set: {
+        title: updatedTask.title,
+        description: updatedTask.description,
+        datelines: updatedTask.datelines,
+        priority: updatedTask.priority,
+      },
+    };
+
+    const result = await addTaskCollection.updateOne(filter, update, options);
+    res.json(result);
+  } catch (error) {
+    console.error('Error updating task:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+  //   app.put('/addTask/:id', async (req, res) => {
+  //     try {
+  //         const id = req.params.id;
+  //         console.log('Task ID:', id);
+  
+  //         const filter = { _id: new ObjectId(id) };
+  //         const options = { upsert: true };
+  //         const updatedTask = req.body;
+  //         console.log('Updated Task Data:', updatedTask);
+  
+  //         // Rest of your code...
+  //     } catch (error) {
+  //         console.error('Error updating task:', error);
+  //         res.status(500).send('Internal Server Error');
+  //     }
+  // });
+  
+      
+  //delete task
+  app.delete('/addTask/:id', async(req, res) =>{
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id)}
+    const result = await addTaskCollection.deleteOne(query)
+    res.send(result)
+  })
 
 
 
